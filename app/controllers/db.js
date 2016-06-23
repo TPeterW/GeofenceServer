@@ -275,7 +275,7 @@ router.get(CONSTANTS.ROUTES.DB.RESPONSE_FETCH, checkIfTaskIdProvided, (req, res,
     console.log(error.message);
     res.json({error: error.message});
   }).then(fetchedResponses => {
-    console.log(fetchedResponses);
+    console.log(fetchedResponses.length);
     res.json({error: "", responses: fetchedResponses});
   });
 
