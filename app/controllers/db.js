@@ -70,7 +70,7 @@ function createChangeLogPromise(taskId, status) {
  *    }]
  * }
  */
-const taskAddRequiredParams = ["userId", "taskId", "taskName", "cost", "expiresAt", "refreshRate", "answersLeft", "locationName", "lat", "lng", "radius", "taskActions"];
+const taskAddRequiredParams = ["userId", "taskName", "cost", "expiresAt", "refreshRate", "answersLeft", "locationName", "lat", "lng", "radius", "taskActions"];
 router.post(CONSTANTS.ROUTES.DB.TASK_ADD, checkRequiredParams(taskAddRequiredParams), (req, res, next) => {
   debug("Requested to create task with following params: ", req.body);
 
