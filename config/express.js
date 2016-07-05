@@ -1,33 +1,18 @@
-import express from "express";
-import glob from "glob";
-import favicon from "serve-favicon";
-import logger from "morgan";
-import cookieParser from "cookie-parser";
-import bodyParser from "body-parser";
-import compress from "compression";
-import methodOverride from "method-override";
-import expressHandlebars from "express-handlebars";
-import Intl from "intl";
-import fs from 'fs';
-//global.Intl = Intl;
-import HandlebarsIntl from "handlebars-intl";
+const express = require("express");
+const glob = require("glob");
+const logger = require("morgan");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const compress = require("compression");
 
-export default function (app, config) {
-  const exphbs = expressHandlebars.create({
-    layoutsDir: config.root + '/app/views/layouts/',
-    defaultLayout: 'main',
-    partialsDir: [config.root + '/app/views/partials/']
-  });
+module.exports = function (app, config) {
   const env = process.env.NODE_ENV || 'development';
   app.locals.ENV = env;
   app.locals.ENV_DEVELOPMENT = env == 'development';
 
-  HandlebarsIntl.registerWith(exphbs.handlebars);
-  app.engine('handlebars', exphbs.engine);
   app.set('views', config.root + '/app/views');
-  app.set('view engine', 'handlebars');
+  app.set("view engine", "hbs");
 
-  // app.use(favicon(config.root + '/public/img/favicon.ico'));
   app.use(logger('dev'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({
@@ -36,11 +21,10 @@ export default function (app, config) {
   app.use(cookieParser());
   app.use(compress());
   app.use(express.static(config.root + '/public'));
-  app.use(methodOverride());
 
   const controllers = glob.sync(config.root + '/app/controllers/*.js');
   controllers.forEach(controller => {
-    require(controller)['default'](app);
+    require(controller)(app);
     // This means "for each controller file, load that file using require, then
     // call the default function that's exported, with app as a parameter.
     // Those default functions just say 'hey app, use these routes.'"

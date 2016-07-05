@@ -1,8 +1,8 @@
 const debug = require("debug")("app:helpers:gcm");
-import gcmConfig from "../../config/gcm-config.json";
-import request from "request";
+const gcmConfig = require("../../config/gcm-config.json");
+const request = require("request");
 
-export default class GCM {
+module.exports = class GCM {
 
   constructor() {
     this.options = {
@@ -15,23 +15,35 @@ export default class GCM {
     };
   }
 
+  /**
+   * Sends a request to Google's GCM server to send notifications to devices.
+   *
+   * @param obj data to be sent to the users' devices
+   * @param to channel to use
+   * @param cb callback with params (error)
+   */
   sendMessage(obj, to, cb) {
-    // TODO: use object extend
     this.options.body = {
-      to: to == "all" ? "/topics/global" : to,
+      to: to || "/topics/global",
       data: obj
     };
 
+    debug("Sending GCM request with body:", this.options.body);
     request(this.options, (error, response, body) => {
       if (error) {
         debug(error);
-      }
-      else {
-        debug("gcm request finished with response.statusCode: " + response.statusCode);
-        debug("gcm request response:", body);
+        return cb(error);
       }
 
-      cb(error, body);
+      debug("GCM request finished with response:", body);
+      // body example:
+      // { multicast_id: 6984045616502393000,
+      //   success: 1,
+      //   failure: 0,
+      //   canonical_ids: 0,
+      //   results: [ { message_id: '0:1467402692743936%7f6d17daf9fd7ecd' } ] }
+
+      cb(null);
     });
   }
-}
+};
