@@ -57,13 +57,13 @@ function createChangeLogPromise(taskId, status) {
  */
 const taskAddRequiredParams = ["taskName", "cost", "expiresAt", "refreshRate", "answersLeft", "locationName", "lat", "lng", "radius", "taskActions"];
 router.post(CONSTANTS.ROUTES.DB.TASK_ADD, middlewares.ensureUserExists, middlewares.checkRequiredParams(taskAddRequiredParams), (req, res, next) => {
-
+  
   function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   }
 
   debug("Requested to create task with following params: ", req.body);
-  const {taskName, cost, refreshRate, expiresAt, answersLeft, locationName, lat, lng, radius, taskActions} = req.body;
+  const {taskName, cost, refreshRate, expiresAt, answersLeft, locationName, lat, lng, radius, taskActions, createLat, createLng} = req.body;
 
   if (!isNumeric(cost)) {
     return next(new Error("Cost must be a number in dollars."));
@@ -82,6 +82,9 @@ router.post(CONSTANTS.ROUTES.DB.TASK_ADD, middlewares.ensureUserExists, middlewa
     refreshRate: refreshRate,
     expiresAt: expiresAt,
     answersLeft: answersLeft,
+    createLat: Number(parseFloat(createLat).toFixed(6)),
+    createLng: Number(parseFloat(createLng).toFixed(6)),
+    activated: true,
     location: {
       name: locationName,
       lat: lat,
@@ -122,7 +125,7 @@ router.post(CONSTANTS.ROUTES.DB.TASK_ADD, middlewares.ensureUserExists, middlewa
  * GET: /db/task-delete/:task_id
  *
  * req: {
- *    // TODO: change to POST
+ *    
  * }
  *
  * res: {
@@ -137,9 +140,37 @@ router.get(CONSTANTS.ROUTES.DB.TASK_DELETE + "/:taskId", (req, res, next) => {
     where: {
       id: taskId
     },
-    include: [db[CONSTANTS.MODELS.LOCATION], db[CONSTANTS.MODELS.TASK_RESPONSE]] // TODO: also destroy corresponding locations, taskactions, and taskactionresponses
-  }).then(createChangeLogPromise(taskId, CONSTANTS.HELPERS.CHANGE_LOG_STATUS_DELETED)).then(() => {
+    include: [db[CONSTANTS.MODELS.LOCATION], db[CONSTANTS.MODELS.TASK_RESPONSE]]
+  }).then(createChangeLogPromise(taskId, CONSTANTS.HELPERS.CHANGE_LOG_STATUS_DELETED)).then( () => {
     res.redirect(CONSTANTS.ROUTES.INDEX);
+  }).catch(error => {
+    return next(error);
+  });
+});
+
+/**
+ * GET: /db/task-deactivate/:task_id
+ *
+ * req: {
+ *    
+ * }
+ *
+ * res: {
+ *    //
+ * }
+ */
+router.get(CONSTANTS.ROUTES.DB.TASK_DEACTIVATE + "/:taskId", (req, res, next) => {
+  const taskId = req.params.taskId;
+  debug(`Deactivating taskId=${taskId}`);
+  
+  db[CONSTANTS.MODELS.TASK].findOne({
+    where: {
+      id: taskId
+    }
+  }).then(task => {
+    task.update({ activated: false });
+    res.redirect(CONSTANTS.ROUTES.INDEX);
+    createChangeLogPromise(taskId, CONSTANTS.HELPERS.CHANGE_LOG_STATUS_COMPLETED);
   }).catch(error => {
     return next(error);
   });
@@ -332,6 +363,6 @@ router.use((err, req, res, next) => {
   res.status(err.status || 500).json({error: err.message});
 });
 
-module.exports = function (app) {
+module.exports = app => {
   app.use("/", router);
 };

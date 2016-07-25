@@ -3,6 +3,9 @@ const db = require("../models");
 const CONSTANTS = require("../../config/constants");
 const router = express.Router();
 
+/***
+ * Homepage
+ */
 router.get(CONSTANTS.ROUTES.INDEX, (req, res, next) => {
   db[CONSTANTS.MODELS.TASK].findAll({
     include: [db[CONSTANTS.MODELS.LOCATION], {
@@ -11,7 +14,7 @@ router.get(CONSTANTS.ROUTES.INDEX, (req, res, next) => {
     }]
   }).then(tasks => {
     res.render(CONSTANTS.VIEWS.INDEX, {
-      title: 'CrowdsourcingServer - Main',
+      title: 'Crowdsourcing Server',
       routes: CONSTANTS.ROUTES,
       tasks: tasks
     });
@@ -20,6 +23,12 @@ router.get(CONSTANTS.ROUTES.INDEX, (req, res, next) => {
   });
 });
 
-module.exports = function (app) {
+
+router.get(CONSTANTS.ROUTES.APK, (req, res, next) => {
+  var file = __dirname + '/../../public/apk/citysourcing.apk';
+  res.download(file);
+});
+
+module.exports = app => {
   app.use("/", router);
 };

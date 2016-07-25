@@ -7,7 +7,10 @@ module.exports = function (sequelize, DataType) {
     cost: {type: DataType.DOUBLE, allowNull: false},
     refreshRate: {type: DataType.DOUBLE, allowNull: false},
     expiresAt: {type: DataType.DOUBLE, allowNull: true},
-    answersLeft: {type: DataType.INTEGER, allowNull: false}
+    answersLeft: {type: DataType.INTEGER, allowNull: false},
+    activated: {type: DataType.BOOLEAN, allowNull: false},
+    createLat: {type: DataType.DOUBLE, allowNull: true},
+    createLng: {type: DataType.DOUBLE, allowNull: true}
   }, {
     classMethods: {
       associate: function (models) {

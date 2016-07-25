@@ -1,0 +1,69 @@
+html
+    head
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width")
+        title=title
+        include styles
+        //- if (ENV_DEVELOPMENT)
+            script(src="http://localhost:35729/livereload.js")
+    body
+        div(class="container")
+            h1=title
+
+            div(class="nav")
+                ul
+                    li
+                        a(href=routes.INDEX) Main
+            
+            ul
+                each task in tasks
+                    li(class="task")
+                        h2 Task
+                        p 
+                            | Name:
+                            = " " + task.name
+                            br/
+                            | Cost (dollars):
+                            = " " + task.cost
+                        
+                        h2 Location
+                        p
+                            p
+                                | Name: 
+                                = " " + task.location.name
+                                br/
+                                | Lat: 
+                                = " " + task.location.lat
+                                br/
+                                | Lng: 
+                                = " " + task.location.lng
+                                br/
+                                | Radius (meters): 
+                                = " " + task.location.radius
+                        
+                        h2 Task Actions
+                        p
+                            each taskaction in task.taskactions
+                                p
+                                    | Description: 
+                                    = " " + taskaction.description
+                                    |  (Type:
+                                    = " " + taskaction.type
+                                    | )
+                                each response in taskaction.taskactionresponses
+                                    p
+                                        | - Response: 
+                                        = " " + response.response
+                                        |  (User:
+                                        = " " + response.userId
+                                        | )
+                        
+                        br/
+                        p=createdAt
+                        
+                        div(class="nav")
+                            ul
+                                li
+                                    a(href=".." + routes.DB.TASK_DELETE + "/" + task.id) Delete
+        
+        include extscripts
